@@ -1,8 +1,18 @@
 # Lorenz System Demonstration
+## What does it look like
 Screenshot:
+
 ![for sigma=10, rho = 15, beta = 8/3](https://github.com/shouya/lorenz/raw/master/lorenz_screenshot.png)
 
-# License
+## Requirements
+* [ruby](http://ruby-lang.org) v1.9 tested, should support v1.8
+* [rubygame](http://www.rubygame.org)
+* [SDL](http://www.libsdl.org)
+
+## Usage
+`ruby game.rb`
+
+## License
 ![WTFPL](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-2.png)
 
 ```
