@@ -2,6 +2,8 @@
 
 require 'matrix'
 
+PI = 3.14159
+
 class LorenzSystem
   #  sigma, rho, beta = 10.0, 28.0, 8.0/3
   attr_accessor :sigma, :rho, :beta
@@ -37,6 +39,10 @@ class LorenzPracticle
     @y += dy * @delta
     @z += dz * @delta
   end
+
+  def step
+    self.clone.tap(&:step!)
+  end
 end
 
 class Projector
@@ -53,6 +59,18 @@ class Projector
     coord_vector = (@proj_matrix * coords) + @trans_matrix
     [coord_vector[0, 0], coord_vector[1, 0]]
   end
+
+  def translate(dx, dy)
+    @trans_matrix += Matrix[[dx], [dy]]
+    nil
+  end
+  def rotate(rx, ry, rz)
+    #             x  y  z    x   y  z
+    #    Matrix[[10, 0, 0], [0, 10, 0]]
+    @proj_matrix *= Matrix[[rx, rz], [ry, rz], [rz, rx]]
+    nil
+  end
+
 end
 =begin
 def render_lorenz
