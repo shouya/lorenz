@@ -1,4 +1,5 @@
 #
+
 require 'matrix'
 
 class LorenzSystem
@@ -11,24 +12,31 @@ class LorenzSystem
   end
 
   def get_vector(x, y, z)
-    x1 = @sigma * (y - x)
-    y1 = x * (@rho + z) - y
-    z1 = x * y - @beta * z
-    [x1, y1, z1]
+    dx = @sigma * (y - x)
+    dy = x * (@rho - z) - y
+    dz = x * y - @beta * z
+    [dx, dy, dz]
   end
 end
 
-class LorenzPraticle
+class LorenzPracticle
   attr_accessor :x, :y, :z, :system, :delta
   def initialize(x, y, z, lorenz_system, delta)
     @system = lorenz_system
     @x, @y, @z = x, y, z
+    @delta = delta
   end
 
   def project(projector)
     projector.project_2d(@x, @y, @z)
   end
 
+  def step!
+    dx, dy, dz = @system.get_vector(@x, @y, @z)
+    @x += dx * @delta
+    @y += dy * @delta
+    @z += dz * @delta
+  end
 end
 
 class Projector
@@ -46,11 +54,10 @@ class Projector
     [coord_vector[0, 0], coord_vector[1, 0]]
   end
 end
-
+=begin
 def render_lorenz
-  x, y, z = 0.01, 0, 0
-  dt = 0.0003
-
+  x, y, z = 200, 0, 0
+  #  dt = 0.0003
 
   100000.times do |n|
 
@@ -67,3 +74,5 @@ def render_lorenz
 end
 
 render_lorenz
+
+=end
