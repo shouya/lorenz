@@ -1,33 +1,58 @@
 #
 require 'matrix'
-require 'rubygame'
 
-# Open a window with a drawable area measuring 640x480 pixels
-@screen = Rubygame::Screen.open [512, 512]
+class LorenzSystem
+  #  sigma, rho, beta = 10.0, 28.0, 8.0/3
+  attr_accessor :sigma, :rho, :beta
+  def initialize(sigma, rho, beta)
+    @sigma = sigma
+    @rho = rho
+    @beta = beta
+  end
 
-# Set the title of the window
-@screen.title = "Hello Rubygame World!"
-# Create a queue to receive events+
-#  + events such as "the mouse has moved", "a key has been pressed" and so on
-@event_queue = Rubygame::EventQueue.new
+  def get_vector(x, y, z)
+    x1 = @sigma * (y - x)
+    y1 = x * (@rho + z) - y
+    z1 = x * y - @beta * z
+    [x1, y1, z1]
+  end
+end
 
-# Use new style events so that this software will work with Rubygame 3.0
-@event_queue.enable_new_style_events
+class LorenzPraticle
+  attr_accessor :x, :y, :z, :system, :delta
+  def initialize(x, y, z, lorenz_system, delta)
+    @system = lorenz_system
+    @x, @y, @z = x, y, z
+  end
 
-@display_matrix = Matrix[[10, 0, 0], [0, 10, 0]]
-@transform_matrix = Matrix[[@screen.width / 2], [@screen.height / 2]]
+  def project(projector)
+    projector.project_2d(@x, @y, @z)
+  end
+
+end
+
+class Projector
+  # @display_matrix = Matrix[[10, 0, 0], [0, 10, 0]]
+  # @transform_matrix = Matrix[[@screen.width / 2], [@screen.height / 2]]
+  attr_accessor :proj_matrix, :trans_matrix
+  def initialize(proj_matrix, trans_matrix)
+    @proj_matrix = proj_matrix
+    @trans_matrix = trans_matrix
+  end
+
+  def project_2d(x, y, z)
+    coords = Matrix[[x, y, z]].transpose
+    coord_vector = (@proj_matrix * coords) + @trans_matrix
+    [coord_vector[0, 0], coord_vector[1, 0]]
+  end
+end
 
 def render_lorenz
   x, y, z = 0.01, 0, 0
   dt = 0.0003
 
-  sigma, rho, beta = 10.0, 28.0, 8.0/3
 
-  2220000.times do |n|
-    x1 = x + sigma * (y - x) * dt
-    y1 = y + (x * rho - y - x * z)  * dt
-    z1 = z + (x * y - beta * z) * dt
-    x, y, z = x1, y1, z1
+  100000.times do |n|
 
     disp_x = disp_y = nil
     @display_matrix.tap { |m|
@@ -42,10 +67,3 @@ def render_lorenz
 end
 
 render_lorenz
-
-# Wait for an event
-while event = @event_queue.wait
-
-  # Stop this program if the user closes the window
-  break if event.is_a? Rubygame::Events::QuitRequested
-end
