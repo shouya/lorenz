@@ -1,5 +1,6 @@
 #
-require "rubygame"
+require 'matrix'
+require 'rubygame'
 
 # Open a window with a drawable area measuring 640x480 pixels
 @screen = Rubygame::Screen.open [512, 512]
@@ -13,30 +14,29 @@ require "rubygame"
 # Use new style events so that this software will work with Rubygame 3.0
 @event_queue.enable_new_style_events
 
-@display_matrix = [[30, 0, 0], [0, 30, 0], [0, 0, 0]]
-@transform_matrix = [@screen.width / 2, @screen.height / 2]
+@display_matrix = Matrix[[10, 0, 0], [0, 10, 0]]
+@transform_matrix = Matrix[[@screen.width / 2], [@screen.height / 2]]
 
 def render_lorenz
-  x, y, z = -1, -2, -3
-  dt = 0.0001
+  x, y, z = 0.01, 0, 0
+  dt = 0.0003
 
-  sigma, rho, beta = 13, 10, 8.0/3
+  sigma, rho, beta = 10.0, 28.0, 8.0/3
 
-  220000.times do
+  2220000.times do |n|
     x1 = x + sigma * (y - x) * dt
-    y1 = y + (x * (rho - z)) * dt
+    y1 = y + (x * rho - y - x * z)  * dt
     z1 = z + (x * y - beta * z) * dt
     x, y, z = x1, y1, z1
 
     disp_x = disp_y = nil
     @display_matrix.tap { |m|
-      disp_x = m[0][0] * x + m[0][1] * y + m[0][2] * z
-      disp_y = m[1][0] * x + m[1][1] * y + m[1][2] * z
-      disp_x += @transform_matrix[0]
-      disp_y += @transform_matrix[1]
+      coords = Matrix[[x, y, z]].transpose
+      coord_vector = (m * coords) + @transform_matrix
+      disp_x, disp_y = coord_vector[0, 0], coord_vector[1, 0]
     }
     @screen.set_at([disp_x, disp_y], [255, 255, 0]) rescue IndexError
-    @screen.update
+    @screen.update if n % 1000 == 0
   end
   @screen.update
 end
